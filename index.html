@@ -61,7 +61,7 @@
 
             
 
-            // initBoard() 
+            
         }
 
         function handleTileSizeInput(){
@@ -81,7 +81,7 @@
         function initBoard () {
             simulationTime = 0
             console.log("Init. Board")
-            //so that the board perfectly fits the tiles and is aligned within the canvas
+            
             boardStartX = (width % tileSize) / 2
             boardStartY = (height % tileSize) / 2
             boardSizeX = width - (boardStartX * 2) 
@@ -90,14 +90,14 @@
 
 
 
-            //next step
+          
             initTiles()
         }
 
 
         function initTiles() {
             console.log("Init. Tiles")
-            //generate board tiles
+ 
             for (let i = 0; i < boardSizeX / tileSize; i++) {
                 tileCountX = i
                 for (let n = 0; n < boardSizeY / tileSize; n++) {
@@ -107,12 +107,11 @@
                 }
             }
 
-            //populate tiles
             let patientZero = false
             for (const tileKey in tiles) {
                 if (patientZero === false) {
                     tiles[tileKey].infected=1
-                    // console.log(tiles[tileKey])
+     
                     patientZero = true
                 }
                 if (Math.random() < citizenChance) {
@@ -120,13 +119,8 @@
                 }
             }
 
-            // for (let i = 0; i < tiles.length; i++) {
-            //     if (tiles[i].)
-            // }
-
-            //begin simulation loop
             console.log('Begin Simulation Loop')
-            // initPOIS()
+           
             simulationLoop()
         }
 
@@ -138,9 +132,9 @@
             renderBoard()
             renderTiles()
             simulationTime++
-            // renderPOIS()
+      
 
-            //again!
+            
             setTimeout(simulationLoop, msPerTick)
         }
 
@@ -171,10 +165,10 @@
 
         function handleTiles() {
             
-            //for each infected citizen in a tile, have a chance to infect one healthy citizen
+           
             for (const tileKey in tiles) {
                 let maxIterations = Math.min(tiles[tileKey].healthy, tiles[tileKey].infected)
-                // console.log(maxIterations)
+                
                 for (let i = 0; i < maxIterations; i++) {
                     if (Math.random() < infectionChance) {
                         tiles[tileKey].healthy--
@@ -183,7 +177,7 @@
                 }
             }
 
-            //add functionality to move citizens in a random direction
+           
             
             for (const tileKey in tiles) {
                 let roll = "0.99"
@@ -277,10 +271,14 @@
                 }
             }
         }
+
+        function reload() {
+            window.location.reload()
+        }
         
 
         function renderBoard() {
-            //draw outline aroound board
+            
             ctx.fillStyle = "black"
             ctx.fillRect(boardStartX-boardOutlineSize,boardStartY-boardOutlineSize,boardSizeX+boardOutlineSize*2,boardSizeY+boardOutlineSize * 2)
 
@@ -290,33 +288,10 @@
      
 
 
-            //debugging -- draw circles at corners of board
-            // ctx.fillStyle = "red"
-            // ctx.beginPath()
-            // ctx.arc(boardStartX, boardStartY, 5, 0, 2*Math.PI)
-            // ctx.fill()  
-            // ctx.fillStyle = "green"
-            // ctx.beginPath()
-            // ctx.arc(boardStartX + boardSizeX, boardStartY + boardSizeY, 5, 0, 2*Math.PI)
-            // ctx.fill()
-
         }
 
         function renderTiles() {
-            //draw each tile
-            // console.log(tiles)
-            // for (let i = 0; i < tiles.length; i++) {
-            //     let tile = tiles[i]
-            //     ctx.fillStyle="black"
-            //     ctx.fillRect(boardStartX + (tileSize * tile.x), boardStartY + (tileSize * tile.y), tileSize, tileSize)
-            //     ctx.fillStyle="white"
-            //     ctx.fillRect(boardStartX + (tileSize * tile.x) + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileOutlineSize, tileSize - tileOutlineSize * 2, tileSize - tileOutlineSize * 2)
-            //     ctx.fillStyle="white"   
-            // }
-        
-
-            //use shade of green background to represent amount of healthy in a tile
-            //use growing red circle in center to represent amount of infected in a tile
+           
             for (const tileKey in tiles) {
                 let tile = tiles[tileKey]
                 ctx.fillStyle="black"
@@ -329,7 +304,7 @@
                 ctx.fillStyle='red'
                 ctx.beginPath()
                 if (tile.infected > 0) {
-                    // console.log(tile.infected)
+                  
                 }
                 ctx.arc(boardStartX + (tileSize * tile.x) + tileSize/2 , boardStartY + (tileSize * tile.y) + tileSize/2 , tile.infected * (tileSize / 10), 0, 2*Math.PI)
                 ctx.fill()
@@ -376,8 +351,8 @@
 <body>
     <canvas></canvas>
     <hr>
-    <h1>Infection Simulator</h1> <button id="startButton">Start</button> 
-    <h2>AP Create Task - Beckett Randlett</h2>
+    <h1>Infection Simulator</h1> <button id="startButton">Start</button> <button onclick="reload()">Stop</button>
+    <h2>AP Create Task</h2>
     <hr>
     <span id="statsArea">
         <h2>Stats</h2>
