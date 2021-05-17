@@ -9,6 +9,8 @@
     <script>
         var canvas, boardStartX, boardStartY, boardSizeX, boardSizeY, tiles = {}, hubs = [], megahubs = []
         const citizenChance = 1/10
+        var tileCountX = 0
+        var tileCountY = 0
         const tileSize = 50
         const familySize = 4
         const infectionChance = 1/10
@@ -52,7 +54,9 @@
             console.log("Init. Tiles")
             //generate board tiles
             for (let i = 0; i < boardSizeX / tileSize; i++) {
+                tileCountX = i
                 for (let n = 0; n < boardSizeY / tileSize; n++) {
+                    tileCountY = n
                     tiles[i.toString() + "," + n.toString()] = {"x": i, "y": n, "has": "empty", "healthy": 0, "infected": 0}
        
                 }
@@ -89,7 +93,7 @@
             // renderPOIS()
 
             //again!
-            setTimeout(gameLoop, 5000)
+            setTimeout(gameLoop, 100)
         }
 
 
@@ -110,120 +114,26 @@
             //add functionality to move citizens in a random direction
             
             for (const tileKey in tiles) {
-                let roll = Math.random().toFixed(1)
-                let coords = tileKey.split(',')
-                coords[0] = parseInt(coords[0])
-                coords[1] = parseInt(coords[1])
-                let healthyCount = tiles[tileKey].healthy
-                let infectedCount = tiles[tileKey].infectedCount
-                let total = healthyCount + infectedCount
-                let healthyMoves = false
-                if (Math.random() * total > healthyCount) {
-                    let healthyMoves = true
-                }
-                //ISSUE: THERE SEEMS TO BE A PROBLEM WHERE CITIZENS THAT DONT EXIST ARE BEING "moved", GENERATING NEGATIVE CITIZEN COUNTS AT THEIT INITIAL LOCATION
-                let newCoords = ""
-                switch(roll) {
-                    case "0.0":
-                        //move right
-                        newCoords = (coords[0] + 1).toString() + "," + coords[1].toString()
-                        if (healthyMoves) {
-                            try {
-                                tiles[newCoords].healthy++
-                                tiles[tileKey].healthy--
-                            } catch {
-
+                for (let i = 0; i < tiles[tileKey].healthy; i++) {
+                    roll = Math.random().toFixed(1)
+                    let coords = tileKey.split(",")
+                    coords[0] = parseInt(coords[0])
+                    coords[1] = parseInt(coords[1])
+                    let newKey = false
+                    switch (roll) {
+                        case "0.0": //direction: -x
+                            if (coords[0] - 1 >= 0) { //if it wouldn't leave the board
+                                newKey = (coords[0] - 1).toString() + ',' + coords[1].toString()
+                            } else {
+                                newKey = (coords[0] + 1).toString() + ',' + coords[1].toString()
                             }
-                        } else {
-                            try {
-                                tiles[newCoords].infected++
-                                tiles[tileKey].infected--
-                                if (tiles[tileKey].infected < 0) {
-                                    console.log(healthyMoves, tiles[tileKey], tiles[newCoords], roll)
-                                }
-                                console.log('subtracting infected')
-                            } catch {
+                    }
+                    
+                    if (newKey != false) {
+                        tiles[tileKey].healthy--
+                        tiles[newKey].healthy++
+                    }
 
-                            }
-
-                        }
-                        break
-                        //do somethign with these coords
-                        //also come up with a contingency for if the citizen is at the edge of the board
-                        //if a direction is invalid go the opposite! this will never fail
-                    case "0.1":
-                        //move left
-                        newCoords = (coords[0] + -1).toString() + "," + coords[1].toString()
-                        if (healthyMoves) {
-                            try {
-                                tiles[newCoords].healthy++
-                                tiles[tileKey].healthy--
-                            } catch {
-
-                            }
-                        } else {
-                            try {
-                                tiles[newCoords].infected++
-                                tiles[tileKey].infected--
-                                console.log('subtracting infected')
-                                if (tiles[tileKey].infected < 0) {
-                                    console.log(healthyMoves, tiles[tileKey], tiles[newCoords], roll)
-                                }
-                            } catch {
-
-                            }
-                        }
-                        break
-                        
-                    case "0.2": 
-                        //move up
-                        newCoords = (coords[0]).toString() + "," + (coords[1] + 1).toString()
-                        if (healthyMoves) {
-                            try {
-                                tiles[newCoords].healthy++
-                                tiles[tileKey].healthy--
-                            } catch {
-
-                            }
-                        } else {
-                            try {
-                                tiles[newCoords].infected++
-                                tiles[tileKey].infected--
-                                console.log('subtracting infected')
-                                if (tiles[tileKey].infected < 0) {
-                                    console.log(healthyMoves, tiles[tileKey], tiles[newCoords], roll)
-                                }
-                            } catch {
-
-                            }
-                        
-                        }
-                        break
-                    case "0.3":
-                        //move down
-                        newCoords = (coords[0]).toString() + "," + (coords[1] + -1).toString()
-                        if (healthyMoves) {
-                            try {
-                                tiles[newCoords].healthy++
-                                tiles[tileKey].healthy--
-                                
-                            } catch {
-
-                            }
-                        } else {
-                            try {
-                                tiles[newCoords].infected++
-                                tiles[tileKey].infected--
-                                console.log('subtracting infected')
-                                if (tiles[tileKey].infected < 0) {
-                                    console.log(healthyMoves, tiles[tileKey], tiles[newCoords], roll )
-                                }
-                            } catch {
-
-                            }
-                        
-                        }
-                        break
                 }
             }
         }
@@ -254,7 +164,7 @@
 
         function renderTiles() {
             //draw each tile
-            console.log(tiles)
+            // console.log(tiles)
             // for (let i = 0; i < tiles.length; i++) {
             //     let tile = tiles[i]
             //     ctx.fillStyle="black"
@@ -264,11 +174,14 @@
             //     ctx.fillStyle="white"   
             // }
         
+
+            //use shade of green background to represent amount of healthy in a tile
+            //use growing red circle in center to represent amount of infected in a tile
             for (const tileKey in tiles) {
                 let tile = tiles[tileKey]
                 ctx.fillStyle="black"
                 ctx.fillRect(boardStartX + (tileSize * tile.x), boardStartY + (tileSize * tile.y), tileSize, tileSize)
-                ctx.fillStyle="white"
+                ctx.fillStyle="rgba(0,255,0," + (tiles[tileKey].healthy * 0.1).toString() + ")"
                 ctx.fillRect(boardStartX + (tileSize * tile.x) + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileOutlineSize, tileSize - tileOutlineSize * 2, tileSize - tileOutlineSize * 2)
                 ctx.fillStyle="white"                 
             }
