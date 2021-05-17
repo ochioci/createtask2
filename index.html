@@ -7,9 +7,11 @@
     <title>Create Task</title>
 
     <script>
-        var canvas, boardStartX, boardStartY, boardSizeX, boardSizeY, tiles = []
-        const tileSize = 10
+        var canvas, boardStartX, boardStartY, boardSizeX, boardSizeY, tiles = {}, hubs = [], megahubs = []
+        const citizenChance = 1/10
+        const tileSize = 50
         const familySize = 4
+        const leaveHomeOdds = 1/100
         const tileOutlineSize = tileSize/25
         const boardOutlineSize = 25
         const homeOdds = 1/10
@@ -50,26 +52,89 @@
             //generate board tiles
             for (let i = 0; i < boardSizeX / tileSize; i++) {
                 for (let n = 0; n < boardSizeY / tileSize; n++) {
-                    tiles.push({"x": i, "y": n, "has": "empty", "citizens": []})
+                    tiles[i.toString() + "," + n.toString()] = {"x": i, "y": n, "has": "empty", "healthy": 0, "infected": 0}
        
                 }
             }
 
+            //populate tiles
+            let patientZero = false
+            for (const tileKey in tiles) {
+                if (patientZero = false) {
+                    tiles[tileKey].infected=1
+                    patientZero = true
+                }
+                if (Math.random() < citizenChance) {
+                    tiles[tileKey].healthy++
+                }
+            }
+
+            // for (let i = 0; i < tiles.length; i++) {
+            //     if (tiles[i].)
+            // }
+
             //begin game loop
             console.log('Begin Game Loop')
-            initPOIS()
-            // gameLoop()
+            // initPOIS()
+            gameLoop()
         }
 
 
         function gameLoop() {
     
+            handleTiles()
             renderBoard()
             renderTiles()
-            renderPOIS()
+            // renderPOIS()
 
             //again!
-            setTimeout(gameLoop, 1000)
+            setTimeout(gameLoop, 5000)
+        }
+
+
+        function handleTiles() {
+            
+            //for each infected citizen in a tile, have a chance to infect one healthy citizen
+            for (const tileKey in tiles) {
+                let maxIterations = Math.min(tiles[tileKey].healthy, tiles[tileKey].infected)
+                for (let i = 0; i < maxIterations; i++) {
+                    if (Math.random() < infectionChance) {
+                        tiles[tileKey].healthy++
+                        tiles[tileKey].infected--
+                    }
+                }
+            }
+
+            //add functionality to move citizens in a random direction
+            
+            for (const tileKey in tiles) {
+                let roll = Math.random().toFixed(1)
+                let coords = tileKey.split(',')
+                let healthyCount = tiles[tileKey].healthy
+                let infectedCount = tiles[tileKey].infectedCount
+                let total = healthyCount + infectedCount
+                let healthyMoves = false
+                if (Math.random() * total > healthyCount) {
+                    let healthyMoves = true
+                }
+                switch(roll) {
+                    case "0.0":
+                        //move right
+                        let newCoords = (coords[0] + 1).toString() + "," + coords[1].toString()
+                        //do somethign with these coords
+                        //also come up with a contingency for if the citizen is at the edge of the board
+                        //if a direction is invalid go the opposite! this will never fail
+                    case "0.1":
+                        //move left
+                        let newCoords = (coords[0] + -1).toString() + "," + coords[1].toString()
+                    case "0.2": 
+                        //move up
+                        let newCoords = (coords[0]).toString() + "," + (coords[1] + 1).toString()
+                    case "0.3":
+                        //move down
+                        let newCoords = (coords[0]).toString() + "," + (coords[1] + -1).toString()
+                }
+            }
         }
         
 
@@ -98,74 +163,28 @@
 
         function renderTiles() {
             //draw each tile
-            for (let i = 0; i < tiles.length; i++) {
-                let tile = tiles[i]
+            console.log(tiles)
+            // for (let i = 0; i < tiles.length; i++) {
+            //     let tile = tiles[i]
+            //     ctx.fillStyle="black"
+            //     ctx.fillRect(boardStartX + (tileSize * tile.x), boardStartY + (tileSize * tile.y), tileSize, tileSize)
+            //     ctx.fillStyle="white"
+            //     ctx.fillRect(boardStartX + (tileSize * tile.x) + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileOutlineSize, tileSize - tileOutlineSize * 2, tileSize - tileOutlineSize * 2)
+            //     ctx.fillStyle="white"   
+            // }
+        
+            for (const tileKey in tiles) {
+                let tile = tiles[tileKey]
                 ctx.fillStyle="black"
                 ctx.fillRect(boardStartX + (tileSize * tile.x), boardStartY + (tileSize * tile.y), tileSize, tileSize)
                 ctx.fillStyle="white"
                 ctx.fillRect(boardStartX + (tileSize * tile.x) + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileOutlineSize, tileSize - tileOutlineSize * 2, tileSize - tileOutlineSize * 2)
-                ctx.fillStyle="white"   
+                ctx.fillStyle="white"                 
             }
+   
         }
         
-        function renderPOIS() {
-            for (let i = 0; i < tiles.length; i++) {
-                if (tiles[i].has === "home") {
-                    ctx.beginPath()
-                    ctx.fillStyle = "darkblue"
-                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize/4 , 0, Math.PI*2)
-                    ctx.fill()
-                } else if (tiles[i].has === "hub") {
-                    ctx.beginPath()
-                    ctx.fillStyle = "purple"
-                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize/2 , 0, Math.PI*2)
-                    ctx.fill()
-                } else if (tiles[i].has === "megahub") {
-                    ctx.beginPath()
-                    ctx.fillStyle = "hotpink"
-                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize * 1.5 , 0, Math.PI*2)
-                    ctx.fill()
-                }
-            }
-        }
-
-
-        function initPOIS() {
-            for (let i = 0; i < tiles.length; i++) {
-                if (Math.random() < homeOdds) {
-                    tiles[i].has="home"
-                    for (let n = 0; n < familySize; n++) {
-                        // console.log(tiles[i])
-                        tiles[i].citizens.push(generateCitizen(tiles[i]))
-                    }
-                }  if (Math.random() < hubOdds) {
-                    tiles[i].has = "hub"
-                }  if (Math.random() <  megaHubOdds) {
-                    tiles[i].has = "megahub"
-                }
-            }
-            gameLoop()
-        }
-
-        function generateCitizen(tile) {
-            return {"infected": false, "home": tile, "location": tile, "locationType": "home", "status": "inPlace", "destination": "none"}
-        }
-
-        
-        function handleCitizens () {
-
-            //  - every tick all inPlace citizens have a certain chance of leaving their tile, 
-            //      choosing a random destination. 
-            //      this gives them status moving
-
-            //  - every tick all moving citizens will make their way towards their destination
-            //      they will make straight lines towards their destination
-            //      tiles will be shaded in green if they contain a citizen. the darker the green the more citizens
-
-            //  - citizens that share a tile have a chance of infecting another citizen that shares that tile in any given tick 
-            //      despite their large display size, POIs are only one tile and infection occurs as normal.
-        }
-
+      
         
 
 
