@@ -11,6 +11,7 @@
         const citizenChance = 1/10
         const tileSize = 50
         const familySize = 4
+        const infectionChance = 1/10
         const leaveHomeOdds = 1/100
         const tileOutlineSize = tileSize/25
         const boardOutlineSize = 25
@@ -97,10 +98,11 @@
             //for each infected citizen in a tile, have a chance to infect one healthy citizen
             for (const tileKey in tiles) {
                 let maxIterations = Math.min(tiles[tileKey].healthy, tiles[tileKey].infected)
+                // console.log(maxIterations)
                 for (let i = 0; i < maxIterations; i++) {
                     if (Math.random() < infectionChance) {
-                        tiles[tileKey].healthy++
-                        tiles[tileKey].infected--
+                        tiles[tileKey].healthy--
+                        tiles[tileKey].infected++
                     }
                 }
             }
@@ -110,6 +112,8 @@
             for (const tileKey in tiles) {
                 let roll = Math.random().toFixed(1)
                 let coords = tileKey.split(',')
+                coords[0] = parseInt(coords[0])
+                coords[1] = parseInt(coords[1])
                 let healthyCount = tiles[tileKey].healthy
                 let infectedCount = tiles[tileKey].infectedCount
                 let total = healthyCount + infectedCount
@@ -117,22 +121,109 @@
                 if (Math.random() * total > healthyCount) {
                     let healthyMoves = true
                 }
+                //ISSUE: THERE SEEMS TO BE A PROBLEM WHERE CITIZENS THAT DONT EXIST ARE BEING "moved", GENERATING NEGATIVE CITIZEN COUNTS AT THEIT INITIAL LOCATION
+                let newCoords = ""
                 switch(roll) {
                     case "0.0":
                         //move right
-                        let newCoords = (coords[0] + 1).toString() + "," + coords[1].toString()
+                        newCoords = (coords[0] + 1).toString() + "," + coords[1].toString()
+                        if (healthyMoves) {
+                            try {
+                                tiles[newCoords].healthy++
+                                tiles[tileKey].healthy--
+                            } catch {
+
+                            }
+                        } else {
+                            try {
+                                tiles[newCoords].infected++
+                                tiles[tileKey].infected--
+                                if (tiles[tileKey].infected < 0) {
+                                    console.log(healthyMoves, tiles[tileKey], tiles[newCoords], roll)
+                                }
+                                console.log('subtracting infected')
+                            } catch {
+
+                            }
+
+                        }
+                        break
                         //do somethign with these coords
                         //also come up with a contingency for if the citizen is at the edge of the board
                         //if a direction is invalid go the opposite! this will never fail
                     case "0.1":
                         //move left
-                        let newCoords = (coords[0] + -1).toString() + "," + coords[1].toString()
+                        newCoords = (coords[0] + -1).toString() + "," + coords[1].toString()
+                        if (healthyMoves) {
+                            try {
+                                tiles[newCoords].healthy++
+                                tiles[tileKey].healthy--
+                            } catch {
+
+                            }
+                        } else {
+                            try {
+                                tiles[newCoords].infected++
+                                tiles[tileKey].infected--
+                                console.log('subtracting infected')
+                                if (tiles[tileKey].infected < 0) {
+                                    console.log(healthyMoves, tiles[tileKey], tiles[newCoords], roll)
+                                }
+                            } catch {
+
+                            }
+                        }
+                        break
+                        
                     case "0.2": 
                         //move up
-                        let newCoords = (coords[0]).toString() + "," + (coords[1] + 1).toString()
+                        newCoords = (coords[0]).toString() + "," + (coords[1] + 1).toString()
+                        if (healthyMoves) {
+                            try {
+                                tiles[newCoords].healthy++
+                                tiles[tileKey].healthy--
+                            } catch {
+
+                            }
+                        } else {
+                            try {
+                                tiles[newCoords].infected++
+                                tiles[tileKey].infected--
+                                console.log('subtracting infected')
+                                if (tiles[tileKey].infected < 0) {
+                                    console.log(healthyMoves, tiles[tileKey], tiles[newCoords], roll)
+                                }
+                            } catch {
+
+                            }
+                        
+                        }
+                        break
                     case "0.3":
                         //move down
-                        let newCoords = (coords[0]).toString() + "," + (coords[1] + -1).toString()
+                        newCoords = (coords[0]).toString() + "," + (coords[1] + -1).toString()
+                        if (healthyMoves) {
+                            try {
+                                tiles[newCoords].healthy++
+                                tiles[tileKey].healthy--
+                                
+                            } catch {
+
+                            }
+                        } else {
+                            try {
+                                tiles[newCoords].infected++
+                                tiles[tileKey].infected--
+                                console.log('subtracting infected')
+                                if (tiles[tileKey].infected < 0) {
+                                    console.log(healthyMoves, tiles[tileKey], tiles[newCoords], roll )
+                                }
+                            } catch {
+
+                            }
+                        
+                        }
+                        break
                 }
             }
         }
