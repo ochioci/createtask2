@@ -113,7 +113,7 @@
                 if (tiles[i].has === "home") {
                     ctx.beginPath()
                     ctx.fillStyle = "darkblue"
-                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize/2 , 0, Math.PI*2)
+                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize/4 , 0, Math.PI*2)
                     ctx.fill()
                 } else if (tiles[i].has === "hub") {
                     ctx.beginPath()
@@ -122,8 +122,8 @@
                     ctx.fill()
                 } else if (tiles[i].has === "megahub") {
                     ctx.beginPath()
-                    ctx.fillStyle = "pink"
-                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize/2 , 0, Math.PI*2)
+                    ctx.fillStyle = "hotpink"
+                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize * 1.5 , 0, Math.PI*2)
                     ctx.fill()
                 }
             }
@@ -148,7 +148,21 @@
         }
 
         function generateCitizen(tile) {
-            return {"infected": false, "home": tile}
+            return {"infected": false, "home": tile, "location": tile, "locationType": "home", "status": "inPlace", "destination": "none"}
+        }
+
+        
+        function handleCitizens () {
+
+            //  - every tick all inPlace citizens have a certain chance of leaving their tile, 
+            //      choosing a random destination. 
+            //      this gives them status moving
+
+            //  - every tick all moving citizens will make their way towards their destination
+            //      they will make straight lines towards their destination
+            //      tiles will be shaded in green if they contain a citizen. the darker the green the more citizens
+
+            //  - citizens that share a tile have a chance of infecting another citizen that shares that tile in any given tick 
         }
 
         
