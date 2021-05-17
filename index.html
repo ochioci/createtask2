@@ -7,7 +7,9 @@
     <title>Create Task</title>
 
     <script>
-        var canvas, boardStartX, boardStartY, boardSizeX, boardSizeY, tiles = {}, hubs = [], megahubs = []
+        var canvas, boardStartX, boardStartY, boardSizeX, boardSizeY, tiles = {}, hubs = [], megahubs = [], oldHealthy = 1, oldInfected = 1
+        var totalCitizensArea, totalInfectedArea, totalHealthyArea, percentInfectedArea, infectionRateArea, tileSizeArea, populationDensityArea, msPerTickArea, tileSizeInput, populationDensityInput,msPerTickInput 
+
         const citizenChance = 1/3
         var tileCountX = 0
         var tileCountY = 0
@@ -15,9 +17,10 @@
         const familySize = 4
         const infectionChance = 1/10
         const leaveHomeOdds = 1/100
-        const tileOutlineSize = tileSize/25
+        const tileOutlineSize = tileSize/100
         const boardOutlineSize = 25
         const homeOdds = 1/10
+        const secondsPerTick = 25
         const hubOdds = 1/100
         const megaHubOdds = 1/1000
         const boardColor = "white"
@@ -25,14 +28,44 @@
             console.log('Initializing')
             canvas = document.querySelector('canvas')
             width = canvas.width = window.innerWidth - 100
-            height = canvas.height = window.innerHeight - 109
+            height = canvas.height = window.innerHeight - 500
             ctx = canvas.getContext("2d")
             ctx.fillStyle = 'grey'
             ctx.fillRect(0,0,width,height)
 
 
-            initBoard() 
+
+            totalCitizensArea = document.getElementById('totalCitizensArea')
+            totalInfectedArea = document.getElementById('totalInfectedArea')
+            totalHealthyArea = document.getElementById('totalHealthyArea')
+            percentInfectedArea = document.getElementById("percentInfectedArea")
+            infectionRateArea = document.getElementById('infectionRateArea')
+
+            tileSizeArea = document.getElementById("tileSizeArea")
+            populationDensityArea = document.getElementById("populationDensityArea")
+            msPerTickArea = document.getElementById("msPerTickArea")
+
+            tileSizeInput = document.getElementById('tileSizeInput')
+            tileSizeInput.addEventListener("change", handleTileSizeInput)
+
+            populationDensityInput = document.getElementById('populationDensityInput')
+            populationDensityInput.addEventListener("change", handlePopulationDensityInput)
+
+            msPerTickInput = document.getElementById("msPerTickInput")
+            msPerTickInput.addEventListener("change", handleMsPerTickInput)
+
+            startButton = document.getElementById('startButton')
+            startButton.addEventListener("click", initBoard)
+
+
+            
+
+            // initBoard() 
         }
+
+        function handleTileSizeInput(){}
+        function handlePopulationDensityInput(){}
+        function handleMsPerTickInput(){}
 
         function initBoard () {
             console.log("Init. Board")
@@ -67,7 +100,7 @@
             for (const tileKey in tiles) {
                 if (patientZero === false) {
                     tiles[tileKey].infected=1
-                    console.log(tiles[tileKey])
+                    // console.log(tiles[tileKey])
                     patientZero = true
                 }
                 if (Math.random() < citizenChance) {
@@ -88,13 +121,30 @@
 
         function gameLoop() {
     
+            handleStats()
             handleTiles()
             renderBoard()
             renderTiles()
             // renderPOIS()
 
             //again!
-            setTimeout(gameLoop, 100)
+            setTimeout(gameLoop, secondsPerTick)
+        }
+
+
+        function handleStats() {
+            let healthy = 0
+            let infected = 0
+            for (const tileKey in tiles) {
+                healthy += tiles[tileKey].healthy
+                infected += tiles[tileKey].infected
+            }
+            let total = healthy + infected
+            let percentInfected = ((infected / total) * 100).toFixed(2)
+            let infectionRate = infected / oldInfected
+
+            oldHealthy = healthy
+            oldInfected = infected
         }
 
 
@@ -258,7 +308,7 @@
                 ctx.fillStyle='red'
                 ctx.beginPath()
                 if (tile.infected > 0) {
-                    console.log(tile.infected)
+                    // console.log(tile.infected)
                 }
                 ctx.arc(boardStartX + (tileSize * tile.x) + tileSize/2 , boardStartY + (tileSize * tile.y) + tileSize/2 , tile.infected * (tileSize / 10), 0, 2*Math.PI)
                 ctx.fill()
@@ -275,9 +325,52 @@
         document.addEventListener("DOMContentLoaded", init)
 
     </script>
+    <style>
+        h1 {
+            display: inline-block;
+            font-size: 20pt;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        h2 {
+            font-size: 15pt;
+            margin: 5px;
+        }
+        h3 {
+            font-size: 12pt;
+            margin: 10px;
+        }
+        button {
+            font-size: 20pt;
+        }
+        span {
+            display: inline-grid;
+            border: 3px solid black;
+            padding: 40px;
+            margin: 20px;
+        }
+
+    </style>
 </head>
 <body>
     <canvas></canvas>
-    
+    <hr>
+    <h1>Infection Simulator</h1> <button id="startButton">Start</button> 
+    <h2>AP Create Task - Beckett Randlett</h2>
+    <hr>
+    <span id="statsArea">
+        <h2>Stats</h2>
+            <h3 id="totalCitizensArea">Total Citizens: --</h3>
+            <h3 id="totalInfectedArea">Total Infected: --</h3>
+            <h3 id="totalHealthyArea">Total Healthy: --</h3>
+            <h3 id="percentInfectedArea">Percent Infected: --</h3>
+            <h3 id="infectionRateArea">Infection Rate: --</h3>
+    </span>
+    <span id="settingsArea">
+        <h2>Settings</h2>
+        <h3 id="tileSizeArea">Tile Size: </h3> <input id="tileSizeInput" type="range" min="10", max="100" value="25">
+        <h3 id="populationDensityArea">Population Density: </h3> <input id="populationDensityInput" type="range" min="2" max="10" value="3">
+        <h3 id="msPerTickArea">Miliseconds per tick: </h3> <input id="msPerTickInput" type="range" min="10" max="1000" value="25">
+    </span>
 </body>
 </html>
