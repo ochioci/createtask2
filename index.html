@@ -8,10 +8,10 @@
 
     <script>
         var canvas, boardStartX, boardStartY, boardSizeX, boardSizeY, tiles = {}, hubs = [], megahubs = []
-        const citizenChance = 1/10
+        const citizenChance = 1/3
         var tileCountX = 0
         var tileCountY = 0
-        const tileSize = 50
+        const tileSize = 10
         const familySize = 4
         const infectionChance = 1/10
         const leaveHomeOdds = 1/100
@@ -115,8 +115,9 @@
             //add functionality to move citizens in a random direction
             
             for (const tileKey in tiles) {
+                let roll = "0.99"
                 for (let i = 0; i < tiles[tileKey].healthy; i++) {
-                    roll = Math.random().toFixed(1)
+                    roll = (Math.random()/2.5).toFixed(1)
                     let coords = tileKey.split(",")
                     coords[0] = parseInt(coords[0])
                     coords[1] = parseInt(coords[1])
@@ -156,6 +157,50 @@
                     if (newKey != false) {
                         tiles[tileKey].healthy--
                         tiles[newKey].healthy++
+                    }
+
+                }
+                for (let i = 0; i < tiles[tileKey].infected; i++) {
+                    roll = (Math.random()/2.5).toFixed(1)
+                    let coords = tileKey.split(",")
+                    coords[0] = parseInt(coords[0])
+                    coords[1] = parseInt(coords[1])
+                    let newKey = false
+                    switch (roll) {
+                        case "0.0": //direction: -x
+                            if (coords[0] - 1 >= 0) { //if it wouldn't leave the board
+                                newKey = (coords[0] - 1).toString() + ',' + coords[1].toString()
+                            } else {
+                                newKey = (coords[0] + 1).toString() + ',' + coords[1].toString()
+                            }
+                            break
+                        case "0.1": //direction +x
+                            if (coords[0] + 1 <= tileCountX) { //if it wouldn't leave the board
+                                newKey = (coords[0] + 1).toString() + ',' + coords[1].toString()
+                            } else {
+                                newKey = (coords[0] - 1).toString() + ',' + coords[1].toString()
+                            }
+                            break
+                        case "0.2": //direction -y
+                            if (coords[1] - 1 >= 0) { //if it wouldn't leave the board
+                                newKey = (coords[0]).toString() + ',' + (coords[1] - 1).toString()
+                            } else {
+                                newKey = (coords[0]).toString() + ',' + (coords[1] + 1).toString()
+                            }
+                            break
+                        case "0.3": //direction +y
+                            if (coords[1] + 1 <= tileCountY) { //if it wouldn't leave the board
+                                newKey = (coords[0]).toString() + ',' + (coords[1] + 1).toString()
+                            } else {
+                                newKey = (coords[0]).toString() + ',' + (coords[1] - 1).toString()
+                            }
+                            break
+                        
+                    }
+                    
+                    if (newKey != false) {
+                        tiles[tileKey].infected--
+                        tiles[newKey].infected++
                     }
 
                 }
@@ -215,7 +260,7 @@
                 if (tile.infected > 0) {
                     console.log(tile.infected)
                 }
-                ctx.arc(boardStartX + (tileSize * tile.x) + tileSize/2 + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileSize/2 + tileOutlineSize, tile.infected * (tileSize / 10), 0, 2*Math.PI)
+                ctx.arc(boardStartX + (tileSize * tile.x) + tileSize/2 , boardStartY + (tileSize * tile.y) + tileSize/2 , tile.infected * (tileSize / 10), 0, 2*Math.PI)
                 ctx.fill()
                 
                                 
