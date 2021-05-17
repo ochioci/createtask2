@@ -65,8 +65,9 @@
             //populate tiles
             let patientZero = false
             for (const tileKey in tiles) {
-                if (patientZero = false) {
+                if (patientZero === false) {
                     tiles[tileKey].infected=1
+                    console.log(tiles[tileKey])
                     patientZero = true
                 }
                 if (Math.random() < citizenChance) {
@@ -127,6 +128,29 @@
                             } else {
                                 newKey = (coords[0] + 1).toString() + ',' + coords[1].toString()
                             }
+                            break
+                        case "0.1": //direction +x
+                            if (coords[0] + 1 <= tileCountX) { //if it wouldn't leave the board
+                                newKey = (coords[0] + 1).toString() + ',' + coords[1].toString()
+                            } else {
+                                newKey = (coords[0] - 1).toString() + ',' + coords[1].toString()
+                            }
+                            break
+                        case "0.2": //direction -y
+                            if (coords[1] - 1 >= 0) { //if it wouldn't leave the board
+                                newKey = (coords[0]).toString() + ',' + (coords[1] - 1).toString()
+                            } else {
+                                newKey = (coords[0]).toString() + ',' + (coords[1] + 1).toString()
+                            }
+                            break
+                        case "0.3": //direction +y
+                            if (coords[1] + 1 <= tileCountY) { //if it wouldn't leave the board
+                                newKey = (coords[0]).toString() + ',' + (coords[1] + 1).toString()
+                            } else {
+                                newKey = (coords[0]).toString() + ',' + (coords[1] - 1).toString()
+                            }
+                            break
+                        
                     }
                     
                     if (newKey != false) {
@@ -181,9 +205,20 @@
                 let tile = tiles[tileKey]
                 ctx.fillStyle="black"
                 ctx.fillRect(boardStartX + (tileSize * tile.x), boardStartY + (tileSize * tile.y), tileSize, tileSize)
-                ctx.fillStyle="rgba(0,255,0," + (tiles[tileKey].healthy * 0.1).toString() + ")"
+                ctx.fillStyle="white" 
                 ctx.fillRect(boardStartX + (tileSize * tile.x) + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileOutlineSize, tileSize - tileOutlineSize * 2, tileSize - tileOutlineSize * 2)
-                ctx.fillStyle="white"                 
+                ctx.fillStyle="rgba(0,255,0," + (tiles[tileKey].healthy * 0.2).toString() + ")"
+                ctx.fillRect(boardStartX + (tileSize * tile.x) + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileOutlineSize, tileSize - tileOutlineSize * 2, tileSize - tileOutlineSize * 2)
+
+                ctx.fillStyle='red'
+                ctx.beginPath()
+                if (tile.infected > 0) {
+                    console.log(tile.infected)
+                }
+                ctx.arc(boardStartX + (tileSize * tile.x) + tileSize/2 + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileSize/2 + tileOutlineSize, tile.infected * (tileSize / 10), 0, 2*Math.PI)
+                ctx.fill()
+                
+                                
             }
    
         }
