@@ -7,23 +7,151 @@
     <title>Create Task</title>
 
     <script>
-        var canvas
+        var canvas, boardStartX, boardStartY, boardSizeX, boardSizeY, tiles = []
+        const tileSize = 10
+        const familySize = 4
+        const tileOutlineSize = tileSize/25
+        const boardOutlineSize = 25
+        const homeOdds = 1/10
+        const hubOdds = 1/100
+        const megaHubOdds = 1/1000
+        const boardColor = "white"
         function init () {
+            console.log('Initializing')
             canvas = document.querySelector('canvas')
-            width = canvas.width = window.innerWidth -10
-            height = canvas.height = window.innerHeight - 10
+            width = canvas.width = window.innerWidth - 100
+            height = canvas.height = window.innerHeight - 109
             ctx = canvas.getContext("2d")
-            
-            ctx.fillStyle="grey"
+            ctx.fillStyle = 'grey'
             ctx.fillRect(0,0,width,height)
 
 
-            initTiles() 
+            initBoard() 
         }
 
-        function initTiles () {
-            
+        function initBoard () {
+            console.log("Init. Board")
+            //so that the board perfectly fits the tiles and is aligned within the canvas
+            boardStartX = (width % tileSize) / 2
+            boardStartY = (height % tileSize) / 2
+            boardSizeX = width - (boardStartX * 2) 
+            boardSizeY = height - (boardStartY * 2)
+    
+
+
+
+            //next step
+            initTiles()
         }
+
+
+        function initTiles() {
+            console.log("Init. Tiles")
+            //generate board tiles
+            for (let i = 0; i < boardSizeX / tileSize; i++) {
+                for (let n = 0; n < boardSizeY / tileSize; n++) {
+                    tiles.push({"x": i, "y": n, "has": "empty", "citizens": []})
+       
+                }
+            }
+
+            //begin game loop
+            console.log('Begin Game Loop')
+            initPOIS()
+            // gameLoop()
+        }
+
+
+        function gameLoop() {
+    
+            renderBoard()
+            renderTiles()
+            renderPOIS()
+
+            //again!
+            setTimeout(gameLoop, 1000)
+        }
+        
+
+        function renderBoard() {
+            //draw outline aroound board
+            ctx.fillStyle = "black"
+            ctx.fillRect(boardStartX-boardOutlineSize,boardStartY-boardOutlineSize,boardSizeX+boardOutlineSize*2,boardSizeY+boardOutlineSize * 2)
+
+
+            ctx.fillStyle = "white"
+            ctx.fillRect(boardStartX, boardStartY, boardSizeX, boardSizeY)
+     
+
+
+            //debugging -- draw circles at corners of board
+            ctx.fillStyle = "red"
+            ctx.beginPath()
+            ctx.arc(boardStartX, boardStartY, 5, 0, 2*Math.PI)
+            ctx.fill()  
+            ctx.fillStyle = "green"
+            ctx.beginPath()
+            ctx.arc(boardStartX + boardSizeX, boardStartY + boardSizeY, 5, 0, 2*Math.PI)
+            ctx.fill()
+
+        }
+
+        function renderTiles() {
+            //draw each tile
+            for (let i = 0; i < tiles.length; i++) {
+                let tile = tiles[i]
+                ctx.fillStyle="black"
+                ctx.fillRect(boardStartX + (tileSize * tile.x), boardStartY + (tileSize * tile.y), tileSize, tileSize)
+                ctx.fillStyle="white"
+                ctx.fillRect(boardStartX + (tileSize * tile.x) + tileOutlineSize, boardStartY + (tileSize * tile.y) + tileOutlineSize, tileSize - tileOutlineSize * 2, tileSize - tileOutlineSize * 2)
+                ctx.fillStyle="white"   
+            }
+        }
+        
+        function renderPOIS() {
+            for (let i = 0; i < tiles.length; i++) {
+                if (tiles[i].has === "home") {
+                    ctx.beginPath()
+                    ctx.fillStyle = "darkblue"
+                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize/2 , 0, Math.PI*2)
+                    ctx.fill()
+                } else if (tiles[i].has === "hub") {
+                    ctx.beginPath()
+                    ctx.fillStyle = "purple"
+                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize/2 , 0, Math.PI*2)
+                    ctx.fill()
+                } else if (tiles[i].has === "megahub") {
+                    ctx.beginPath()
+                    ctx.fillStyle = "pink"
+                    ctx.arc(boardStartX + (tiles[i].x * tileSize), boardStartY + (tiles[i].y * tileSize), tileSize/2 , 0, Math.PI*2)
+                    ctx.fill()
+                }
+            }
+        }
+
+
+        function initPOIS() {
+            for (let i = 0; i < tiles.length; i++) {
+                if (Math.random() < homeOdds) {
+                    tiles[i].has="home"
+                    for (let n = 0; n < familySize; n++) {
+                        // console.log(tiles[i])
+                        tiles[i].citizens.push(generateCitizen(tiles[i]))
+                    }
+                }  if (Math.random() < hubOdds) {
+                    tiles[i].has = "hub"
+                }  if (Math.random() <  megaHubOdds) {
+                    tiles[i].has = "megahub"
+                }
+            }
+            gameLoop()
+        }
+
+        function generateCitizen(tile) {
+            return {"infected": false, "home": tile}
+        }
+
+        
 
 
         document.addEventListener("DOMContentLoaded", init)
